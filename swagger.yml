@@ -1,0 +1,70 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: "0.0.0"
+  title: Server Chat Service
+
+# Describe your paths here
+paths:
+  # This is a path endpoint. Change it.
+  /Chat:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Gets `data` objects from NLP BOT.
+        Gets the `GPS coordinates` where the chat was created 
+      # This is array of GET operation parameters:
+      parameters:
+        # An example parameter that is in query and is required
+        -
+          name: data
+          in: query
+          description: data for service
+          required: true
+          type: string
+          format: string
+        
+        -
+          name: coordinates
+          in: query
+          description: GPS coordinates
+          required: true
+          type: number
+          format: coordinates
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          # A schema describing your response object.
+          # Use JSON Schema format
+          
+    
+    post:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Posts `data` about the service to mobile user, provided by the NLP Bot.
+      # This is array of GET operation parameters:
+      parameters:
+        # An example parameter that is in query and is required
+        -
+          name: data
+          in: query
+          description: data for service
+          required: true
+          type: string
+          format: string
+        
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: a dataset containing the service required by mobile user
+          # A schema describing your response object.
+          # Use JSON Schema format
+          
