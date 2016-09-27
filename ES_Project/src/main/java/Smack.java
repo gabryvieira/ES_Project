@@ -24,9 +24,11 @@ public class Smack {
     public static AbstractXMPPConnection connection;
     static int op;
     static int chatOp;
+    static String newUsername;
 
-    public static String newUsername;
-    public static String newUserPass;
+    static String newUserPass;
+
+    static MultiUserChatManager manager;
     public static Scanner sc = new Scanner(System.in);
     public static void main(String [] args) throws Exception{
 
@@ -36,6 +38,7 @@ public class Smack {
             System.out.println("What do you want to do?");
             System.out.println("1 - Create a new user");
             System.out.println("2 - Create a Group Chat");
+            System.out.println("3 - Join a room");
             System.out.println("0 - Exit");
             System.out.print("Option --> ");
             op = sc.nextInt();
@@ -47,7 +50,9 @@ public class Smack {
                 case 2:
                     createChat(connection);
                     break;
-
+                case 3:
+                    joinToChatRoom(connection);
+                    break;
                 case 0:
                     System.out.println("Bye!");
                     System.exit(0);
@@ -89,6 +94,7 @@ public class Smack {
     }
 
     public static void createUser(AbstractXMPPConnection connection) throws Exception {
+
         System.out.print("Username: ");
         newUsername = sc.next();
         System.out.print("Password: ");
@@ -101,11 +107,12 @@ public class Smack {
     }
 
     // instant chat
-    public static  void createChat(AbstractXMPPConnection connection) throws Exception{
-
+    public static void createChat(AbstractXMPPConnection connection) throws Exception{
 
         // Get the MultiUserChatManager
-        MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+        manager = getInstanceForConnection(connection);
+        //MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+
         // Get a MultiUserChat using MultiUserChatManager
         MultiUserChat muc = manager.getMultiUserChat("sala@conference.admin");
 
@@ -145,5 +152,24 @@ public class Smack {
 
             }
         }while(chatOp != 0);
+    }
+
+            // juntar se a uma sala de chat
+    public static void joinToChatRoom(AbstractXMPPConnection connection) throws Exception{
+        // Create a MultiUserChat using an XMPPConnection for a room
+        manager = getInstanceForConnection(connection);
+        MultiUserChat muc2 = manager.getMultiUserChat("sala@conference.admin");
+
+        // User2 joins the new room
+        // The room service will decide the amount of history to send
+        // nickname = testbot
+        muc2.join("testbot");
+        // quando a connection se desliga, naturalmente que os utilizadores deixam de estar no chat
+        System.out.println("Joined to chat");
+    }
+                        // get Instance for Connection used for chatrooms
+    public static MultiUserChatManager getInstanceForConnection(AbstractXMPPConnection connection){
+        manager = MultiUserChatManager.getInstanceFor(connection);
+        return manager;
     }
 }
