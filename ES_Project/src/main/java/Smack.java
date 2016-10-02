@@ -3,11 +3,16 @@
  */
 
 import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.chat.Chat;
+import org.jivesoftware.smack.chat.ChatMessageListener;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.iqregister.AccountManager;
+import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
+import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.xdata.Form;
 import org.jivesoftware.smackx.xdata.packet.DataForm;
 
@@ -18,8 +23,11 @@ import java.util.*;
 
 public class Smack {
 
-    static final String usernameAdmin = "admin";
-    static final String passwordAdmin = "anadiafc";
+    static final String usernameAdmin = "antonio";
+    static final String passwordAdmin = "figueira";
+
+    static String usernameLogin;
+    static String passwordLogin;
     static final String localhost = "127.0.0.1";
     public static AbstractXMPPConnection connection;
     static int op;
@@ -29,8 +37,15 @@ public class Smack {
     static String newUserPass;
 
     static MultiUserChatManager manager;
+
+    public static MessageListener messageListener;
     public static Scanner sc = new Scanner(System.in);
     public static void main(String [] args) throws Exception{
+
+        /*System.out.print("Username: ");
+        usernameLogin = sc.next();
+        System.out.print("Password:");
+        passwordLogin = sc.next();*/
 
         connection = createConnection();
         System.out.println("Hello " + usernameAdmin + "!");
@@ -128,7 +143,6 @@ public class Smack {
                 case 1:
                     // Create the room
                     muc.create("testbot");
-
                     Form form = muc.getConfigurationForm();
                     Form answerForm = form.createAnswerForm();
                     answerForm.setAnswer("muc#roomconfig_persistentroom", true);
@@ -140,8 +154,7 @@ public class Smack {
                 case 2:
                     // Create the room
                     muc.create("testbot");
-                    // Send an empty room configuration form which indicates that we want
-                    // an instant room
+                    // Send an empty room configuration form which indicates that we want an instant room
                     muc.sendConfigurationForm(new Form(DataForm.Type.submit));
                     System.out.println("Instant chat was created :)!");
                     break;
@@ -160,16 +173,39 @@ public class Smack {
         manager = getInstanceForConnection(connection);
         MultiUserChat muc2 = manager.getMultiUserChat("sala@conference.admin");
 
-        // User2 joins the new room
-        // The room service will decide the amount of history to send
-        // nickname = testbot
-        muc2.join("testbot");
-        // quando a connection se desliga, naturalmente que os utilizadores deixam de estar no chat
-        System.out.println("Joined to chat");
+        // User2 joins the new room using a password and the nickname is your username
+        // the amount of history to receive. In this example we are requesting the last 10 messages.
+        DiscussionHistory history = new DiscussionHistory();
+        history.setMaxStanzas(10); // request the last 10 messages
+        muc2.join(connection.getUser(), "password", history, connection.getPacketReplyTimeout());
+        System.out.println("Joined to chat :)");
+
+        // room information
+        RoomInfo info = manager.getRoomInfo("sala@conference.admin");
+        System.out.println("Number of occupants: " + info.getOccupantsCount());
+        System.out.println("Room Subject:" + info.getSubject());
+
+        Chat chat = muc2.createPrivateChat("sala@conference.admin/admin@admin/Smack", (ChatMessageListener) messageListener);
+        chat.sendMessage("Hello there");
     }
+
+
+
                         // get Instance for Connection used for chatrooms
     public static MultiUserChatManager getInstanceForConnection(AbstractXMPPConnection connection){
         manager = MultiUserChatManager.getInstanceFor(connection);
         return manager;
     }
+
+
+    /*private class MyMessageListener implements MessageListener {
+
+        @Override
+        public void processMessage(Chat chat, Message message) {
+            String from = message.getFrom();
+            String body = message.getBody();
+            System.out.println(String.format("Received message " + body + " from " + from));
+        }
+
+    }*/
 }
