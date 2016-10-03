@@ -116,6 +116,8 @@ public class XmppOpenfire {
             default:
                 System.out.println("Please, choose one of these options!");
                 break;
+
+
         }
     }
 

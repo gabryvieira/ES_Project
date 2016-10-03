@@ -127,6 +127,7 @@ public class Smack {
 
         AccountManager ac = AccountManager.getInstance(connection);
         ac.createAccount(newUsername, newUserPass);
+        
 
         System.out.println("User created :)");
     }
