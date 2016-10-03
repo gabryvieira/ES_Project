@@ -23,9 +23,6 @@ import java.util.*;
 
 public class Smack {
 
-    static final String usernameAdmin = "antonio";
-    static final String passwordAdmin = "figueira";
-
     static String usernameLogin;
     static String passwordLogin;
     static final String localhost = "127.0.0.1";
@@ -42,13 +39,16 @@ public class Smack {
     public static Scanner sc = new Scanner(System.in);
     public static void main(String [] args) throws Exception{
 
-        /*System.out.print("Username: ");
+        System.out.print("Username: ");
         usernameLogin = sc.next();
         System.out.print("Password:");
-        passwordLogin = sc.next();*/
+        passwordLogin = sc.next();
+        XmppOpenfire xmppOp = new XmppOpenfire();
 
-        connection = createConnection();
-        System.out.println("Hello " + usernameAdmin + "!");
+        connection = xmppOp.createConnection(usernameLogin, passwordLogin);
+
+        //connection = createConnection();
+        System.out.println("Hello " + usernameLogin + "!");
         do {
             System.out.println("What do you want to do?");
             System.out.println("1 - Create a new user");
@@ -83,7 +83,7 @@ public class Smack {
         connection.disconnect();
     }
 
-    public static AbstractXMPPConnection createConnection() throws Exception {
+    /*public static AbstractXMPPConnection createConnection() throws Exception {
         // Create a connection to the jabber.org server on specific port.
 
         XMPPTCPConnectionConfiguration connConfig = XMPPTCPConnectionConfiguration
@@ -106,7 +106,7 @@ public class Smack {
         System.out.print("Connected to openfire server!");
 
         return connection;
-    }
+    }*/
 
     public static void createUser(AbstractXMPPConnection connection) throws Exception {
 
@@ -186,7 +186,13 @@ public class Smack {
         System.out.println("Room Subject:" + info.getSubject());
 
         Chat chat = muc2.createPrivateChat("sala@conference.admin/admin@admin/Smack", (ChatMessageListener) messageListener);
-        chat.sendMessage("Hello there");
+        System.out.println("Send a message: (input @back to turn back to menu)");
+        String message;
+        do {
+            System.out.print("--> ");
+            message = sc.nextLine();
+            chat.sendMessage(message);
+        }while(!(message.equals("@back")));
     }
 
 
