@@ -37,13 +37,19 @@ public class XmppOpenfire {
 
     public XmppOpenfire(){
         chatOp = 0;
+        newUsername = "";
+        newUserPass = "";
     }
+
+
 
             // get instance connection
     public  MultiUserChatManager getInstanceForConnection(AbstractXMPPConnection connection){
         manager = MultiUserChatManager.getInstanceFor(connection);
         return manager;
     }
+
+
             // criacao da ligacao
     public AbstractXMPPConnection createConnection(String loginUsername, String loginPassword) throws Exception {
         XMPPTCPConnectionConfiguration connConfig = XMPPTCPConnectionConfiguration
@@ -67,6 +73,8 @@ public class XmppOpenfire {
 
         return connection;
     }
+
+
             // criacao de um novo user
     public void createUser(AbstractXMPPConnection connection, String newUsername, String newUserPass) throws Exception {
         AccountManager ac = AccountManager.getInstance(connection);
@@ -81,12 +89,12 @@ public class XmppOpenfire {
         //MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
 
         // Get a MultiUserChat using MultiUserChatManager
-        MultiUserChat muc = manager.getMultiUserChat("sala@conference.admin");
+        MultiUserChat muc = manager.getMultiUserChat("chat@conference.admin");
 
         switch(chatOp) {
             case 1:
                 // persistent chat
-                muc.create("testbot");
+                muc.create("testbot"); // nickname
                 Form form = muc.getConfigurationForm();
                 Form answerForm = form.createAnswerForm();
                 answerForm.setAnswer("muc#roomconfig_persistentroom", true);
@@ -96,10 +104,13 @@ public class XmppOpenfire {
 
             case 2:
                 // instant chat
-                muc.create("testbot");
+                muc.create("testbot"); // nickname
                 // Send an empty room configuration form which indicates that we want an instant room
                 muc.sendConfigurationForm(new Form(DataForm.Type.submit));
                 System.out.println("Instant chat was created :)!");
+                break;
+
+            case 0:
                 break;
 
             default:

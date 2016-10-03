@@ -60,14 +60,23 @@ public class Smack {
 
             switch (op){
                 case 1:
-                    createUser(connection);
+                    xmppOp.createUser(connection, newUsername, newUserPass); // create user
                     break;
                 case 2:
-                    createChat(connection);
+                    do {
+                        System.out.println("Persistent chat or Instant chat?");
+                        System.out.println("1 - Persistent");
+                        System.out.println("2 - Instant");
+                        System.out.println("0 - Back");
+                        System.out.print("Option --> ");
+                        chatOp = sc.nextInt();
+                        xmppOp.createChat(connection, chatOp);
+                    }while(chatOp != 0);
                     break;
                 case 3:
                     joinToChatRoom(connection);
                     break;
+
                 case 0:
                     System.out.println("Bye!");
                     System.exit(0);
@@ -76,6 +85,7 @@ public class Smack {
                 default:
                     System.out.println("Please, choose one of these options!");
                     break;
+
             }
         }while(op != 0);
 
