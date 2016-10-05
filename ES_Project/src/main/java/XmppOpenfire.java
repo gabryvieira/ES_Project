@@ -3,8 +3,6 @@
  */
 
 import org.jivesoftware.smack.*;
-import org.jivesoftware.smack.chat.Chat;
-import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -34,27 +32,28 @@ public class XmppOpenfire {
     private String newUserPass;
 
     private MultiUserChatManager manager;
+    public static MessageListener messageListener;
 
-    public XmppOpenfire(){
+
+    public static Scanner sc = new Scanner(System.in);
+
+    public XmppOpenfire(String loginUsername, String loginPassword){
+        this.loginUsername = loginUsername;
+        this.loginPassword = loginPassword;
         chatOp = 0;
         newUsername = "";
         newUserPass = "";
+
     }
 
 
-
-            // get instance connection
-    public  MultiUserChatManager getInstanceForConnection(AbstractXMPPConnection connection){
-        manager = MultiUserChatManager.getInstanceFor(connection);
-        return manager;
-    }
 
 
             // criacao da ligacao
     public AbstractXMPPConnection createConnection(String loginUsername, String loginPassword) throws Exception {
         XMPPTCPConnectionConfiguration connConfig = XMPPTCPConnectionConfiguration
                 .builder()
-                .setServiceName("example.com")
+                .setServiceName("jabber.org")
                 .setHost(localhost)
                 .setPort(port)
                 .setCompressionEnabled(false)
@@ -88,6 +87,7 @@ public class XmppOpenfire {
         manager = getInstanceForConnection(connection);
         //MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
 
+        // CRIAR LISTA DE CHATS --> PASSAR SO O NOME
         // Get a MultiUserChat using MultiUserChatManager
         MultiUserChat muc = manager.getMultiUserChat("chat@conference.admin");
 
@@ -121,9 +121,12 @@ public class XmppOpenfire {
         }
     }
 
-    /*public void joinToChatRoom(AbstractXMPPConnection connection) throws Exception{
+    public void joinToChatRoom(AbstractXMPPConnection connection) throws Exception{
         // Create a MultiUserChat using an XMPPConnection for a room
         manager = getInstanceForConnection(connection);
+        //System.out.println("Choose a room to join: ");
+
+        //String room = sc.next();
         MultiUserChat muc2 = manager.getMultiUserChat("sala@conference.admin");
 
         // User2 joins the new room using a password and the nickname is your username
@@ -136,15 +139,51 @@ public class XmppOpenfire {
         // room information
         RoomInfo info = manager.getRoomInfo("sala@conference.admin");
         System.out.println("Number of occupants: " + info.getOccupantsCount());
-        System.out.println("Room Subject:" + info.getSubject());
+        System.out.println("Room Subject: " + info.getSubject());
+        System.out.println("Room Name: "+info.getName());
 
-        Chat chat = muc2.createPrivateChat("sala@conference.admin/admin@admin/Smack", (ChatMessageListener) messageListener);
+
+
+        Message message = new Message("sala@conference.admin", Message.Type.groupchat);
+        message.setBody("hi there");
+        message.setType(Message.Type.groupchat);
+        message.setTo("sala");
+        muc2.sendMessage(message);
+
+
+        muc2.addMessageListener(new MessageListener()
+        {
+            @Override
+            public void processMessage(Message message) {
+                System.out.println("Message listener Received message in send message: "
+                        + (message != null ? message.getBody() : "NULL") + "  , Message sender :" + message.getFrom());
+            }
+        });
+
+
+        /*Chat chat = muc2.createPrivateChat("sala@conference.admin/admin@admin/Smack", (ChatMessageListener) messageListener);
         System.out.println("Send a message: (input @back to turn back to menu)");
-        String message;
-        do {
+        String message;*/
+
+
+        /*do {
             System.out.print("--> ");
             message = sc.nextLine();
             chat.sendMessage(message);
-        }while(!(message.equals("@back")));
-    }*/
+        }while(!(message.equals("@back")));*/
+    }
+
+    public String getLoginUsername(){
+        return loginUsername;
+    }
+
+    public String getLoginPassword(){
+        return loginPassword;
+    }
+
+    // get instance connection
+    public  MultiUserChatManager getInstanceForConnection(AbstractXMPPConnection connection){
+        manager = MultiUserChatManager.getInstanceFor(connection);
+        return manager;
+    }
 }
