@@ -27,7 +27,7 @@ public class Smack {
 
         System.out.print("Username: ");
         usernameLogin = sc.next();
-        System.out.print("Password:");
+        System.out.print("Password: ");
         passwordLogin = sc.next();
         XmppOpenfire xmppOp = new XmppOpenfire(usernameLogin, passwordLogin);
 
@@ -56,11 +56,24 @@ public class Smack {
                         System.out.println("0 - Back");
                         System.out.print("Option --> ");
                         chatOp = sc.nextInt();
-                        xmppOp.createChat(connection, chatOp);
+                        if(chatOp == 0)
+                            break;
+
+                        System.out.print("Chat Name: ");
+                        String chatName = sc.next();
+                        /*System.out.print("Description: ");
+                        System.out.print("Raio: ");
+                        System.out.print("Public or private:");*/
+
+                        xmppOp.createChat(connection, chatOp, chatName);
                     }while(chatOp != 0);
                     break;
                 case 3:
-                    xmppOp.joinToChatRoom(connection);
+                    System.out.println("Available chats");
+                    System.out.println(xmppOp.getChatRooms().toString().replace("[", "").replace("]", ""));
+                    System.out.println("Input the name of the chat to join: ");
+                    String chatNameToJoin = sc.next();
+                    xmppOp.joinToChatRoom(connection, chatNameToJoin);
                     break;
 
                 case 0:

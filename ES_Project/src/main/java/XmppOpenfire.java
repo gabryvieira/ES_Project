@@ -18,6 +18,9 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import java.io.IOException;
 import java.util.*;
+
+import static org.jivesoftware.smackx.pubsub.ChildrenAssociationPolicy.owners;
+
 public class XmppOpenfire {
 
     private String loginUsername;
@@ -31,11 +34,16 @@ public class XmppOpenfire {
     private String newUsername;
     private String newUserPass;
 
+    private int chatID;
+
+    private List<String> chatrooms = new ArrayList<>();
+
     private MultiUserChatManager manager;
     public static MessageListener messageListener;
 
 
     public static Scanner sc = new Scanner(System.in);
+    private String body;
 
     public XmppOpenfire(String loginUsername, String loginPassword){
         this.loginUsername = loginUsername;
@@ -43,6 +51,7 @@ public class XmppOpenfire {
         chatOp = 0;
         newUsername = "";
         newUserPass = "";
+
 
     }
 
@@ -70,6 +79,7 @@ public class XmppOpenfire {
         connection.login(); // credentials by default to access openfire (ADMIN ONLY)
         System.out.print("Connected to openfire server!");
 
+
         return connection;
     }
 
@@ -81,53 +91,38 @@ public class XmppOpenfire {
         System.out.println("User created :)");
     }
 
-    public void createChat(AbstractXMPPConnection connection, int chatOp) throws Exception {
+    public void createChat(AbstractXMPPConnection connection, int chatOp, String chatName) throws Exception {
 
         // Get the MultiUserChatManager
         manager = getInstanceForConnection(connection);
         //MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
 
-        // CRIAR LISTA DE CHATS --> PASSAR SO O NOME
+        chatrooms.add(chatID,chatName);
         // Get a MultiUserChat using MultiUserChatManager
-        MultiUserChat muc = manager.getMultiUserChat("chat@conference.admin");
+        MultiUserChat muc = manager.getMultiUserChat(chatName+"@conference.admin");
 
-        switch(chatOp) {
-            case 1:
-                // persistent chat
-                muc.create("testbot"); // nickname
-                Form form = muc.getConfigurationForm();
-                Form answerForm = form.createAnswerForm();
-                answerForm.setAnswer("muc#roomconfig_persistentroom", true);
-                muc.sendConfigurationForm(answerForm);
-                System.out.println("Persistent chat was created :)!");
-                break;
+        // persistent chat
+        muc.create("chat"); // nickname
+        Form form = muc.getConfigurationForm();
+        Form answerForm = form.createAnswerForm();
+        answerForm.setAnswer("muc#roomconfig_publicroom", true);
+        if(chatOp == 1)
+            answerForm.setAnswer("muc#roomconfig_persistentroom", true);
+        else if(chatOp == 2)
+            answerForm.setAnswer("muc#roomconfig_persistentroom", false);
+        answerForm.setAnswer("muc#roomconfig_roomname", chatName);
 
-            case 2:
-                // instant chat
-                muc.create("testbot"); // nickname
-                // Send an empty room configuration form which indicates that we want an instant room
-                muc.sendConfigurationForm(new Form(DataForm.Type.submit));
-                System.out.println("Instant chat was created :)!");
-                break;
+        muc.sendConfigurationForm(answerForm);
+        System.out.println("Persistent chat was created :)!");
+        chatID++;
 
-            case 0:
-                break;
-
-            default:
-                System.out.println("Please, choose one of these options!");
-                break;
-
-
-        }
     }
 
-    public void joinToChatRoom(AbstractXMPPConnection connection) throws Exception{
+    public void joinToChatRoom(AbstractXMPPConnection connection, String chatToJoin) throws Exception{
         // Create a MultiUserChat using an XMPPConnection for a room
         manager = getInstanceForConnection(connection);
-        //System.out.println("Choose a room to join: ");
 
-        //String room = sc.next();
-        MultiUserChat muc2 = manager.getMultiUserChat("sala@conference.admin");
+        MultiUserChat muc2 = manager.getMultiUserChat(chatToJoin+"@conference.admin");
 
         // User2 joins the new room using a password and the nickname is your username
         // the amount of history to receive. In this example we are requesting the last 10 messages.
@@ -137,28 +132,35 @@ public class XmppOpenfire {
         System.out.println("Joined to chat :)");
 
         // room information
-        RoomInfo info = manager.getRoomInfo("sala@conference.admin");
+        RoomInfo info = manager.getRoomInfo(chatToJoin+"@conference.admin");
         System.out.println("Number of occupants: " + info.getOccupantsCount());
-        System.out.println("Room Subject: " + info.getSubject());
+        //System.out.println("Room Subject: " + info.getSubject());
         System.out.println("Room Name: "+info.getName());
 
 
+        Message message = new Message(chatToJoin + "@conference.admin", Message.Type.groupchat);
+        String body;
 
-        Message message = new Message("sala@conference.admin", Message.Type.groupchat);
-        message.setBody("hi there");
-        message.setType(Message.Type.groupchat);
-        message.setTo("sala");
-        muc2.sendMessage(message);
+        do {
+            System.out.print("--> ");
+            body = sc.nextLine();
+            message.setBody(body);
+            message.setType(Message.Type.groupchat);
+            message.setTo(chatToJoin);
+            muc2.sendMessage(message);
+            muc2.addMessageListener(new MessageListener() {
+                @Override
+                public void processMessage(Message message) {
+                    System.out.println("Received message: "
+                            + (message != null ? message.getBody() : "NULL") + "  , Message sender :" + message.getFrom());
+                }
+            });
+        }while(!body.equals("back"));
 
 
-        muc2.addMessageListener(new MessageListener()
-        {
-            @Override
-            public void processMessage(Message message) {
-                System.out.println("Message listener Received message in send message: "
-                        + (message != null ? message.getBody() : "NULL") + "  , Message sender :" + message.getFrom());
-            }
-        });
+
+
+
 
 
         /*Chat chat = muc2.createPrivateChat("sala@conference.admin/admin@admin/Smack", (ChatMessageListener) messageListener);
@@ -179,6 +181,14 @@ public class XmppOpenfire {
 
     public String getLoginPassword(){
         return loginPassword;
+    }
+
+    public List<String> getChatRooms(){
+        return chatrooms;
+    }
+
+    public int getChatID(){
+        return chatID;
     }
 
     // get instance connection
