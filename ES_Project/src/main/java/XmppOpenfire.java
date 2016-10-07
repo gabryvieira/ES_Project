@@ -6,6 +6,10 @@ import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smackx.filetransfer.FileTransferListener;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -17,9 +21,9 @@ import org.jivesoftware.smackx.xdata.packet.DataForm;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
-import static org.jivesoftware.smackx.pubsub.ChildrenAssociationPolicy.owners;
 
 public class XmppOpenfire {
 
@@ -144,6 +148,8 @@ public class XmppOpenfire {
         do {
             System.out.print("--> ");
             body = sc.nextLine();
+            if(body.equals("@files"))
+                TransferFile(connection);
             message.setBody(body);
             message.setType(Message.Type.groupchat);
             message.setTo(chatToJoin);
@@ -155,7 +161,7 @@ public class XmppOpenfire {
                             + (message != null ? message.getBody() : "NULL") + "  , Message sender :" + message.getFrom());
                 }
             });
-        }while(!body.equals("back"));
+        }while(!body.equals("@exit"));
 
 
 
@@ -175,6 +181,22 @@ public class XmppOpenfire {
         }while(!(message.equals("@back")));*/
     }
 
+    public void TransferFile(AbstractXMPPConnection connection){
+        final FileTransferManager manager = new FileTransferManager(connection); //Use your xmpp connection
+        manager.addFileTransferListener(new FileTransferListener() {
+            public void fileTransferRequest(FileTransferRequest request) {
+                IncomingFileTransfer transfer = request.accept();
+                try {
+                    InputStream input = transfer.recieveFile();
+                    //This will be a binary stream and you can process it. Create image and display it inline in your chat app.
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                } catch (SmackException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     public String getLoginUsername(){
         return loginUsername;
     }
@@ -187,9 +209,6 @@ public class XmppOpenfire {
         return chatrooms;
     }
 
-    public int getChatID(){
-        return chatID;
-    }
 
     // get instance connection
     public  MultiUserChatManager getInstanceForConnection(AbstractXMPPConnection connection){
