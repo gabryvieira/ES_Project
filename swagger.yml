@@ -16,26 +16,18 @@ paths:
     get:
       # Describe this verb here. Note: you can use markdown
       description: |
-        Gets `data` objects from NLP BOT.
+        Gets `data` events objects from NLP BOT.
         Gets the `GPS coordinates` where the chat was created 
       # This is array of GET operation parameters:
       parameters:
         # An example parameter that is in query and is required
         -
-          name: data
+          name: data events
           in: query
           description: data for service
           required: true
           type: string
           format: string
-        
-        -
-          name: coordinates
-          in: query
-          description: GPS coordinates
-          required: true
-          type: number
-          format: coordinates
       # Expected responses for this operation:
       responses:
         # Response code
@@ -43,7 +35,11 @@ paths:
           description: Successful response
           # A schema describing your response object.
           # Use JSON Schema format
-          
+        400:
+          description: No available data 
+        401:
+          description: Invalid data
+  /Mobile App:       
     
     post:
       # Describe this verb here. Note: you can use markdown
@@ -67,4 +63,58 @@ paths:
           description: a dataset containing the service required by mobile user
           # A schema describing your response object.
           # Use JSON Schema format
+        400:
+          description: No available data
+        401:
+          description: Invalid data
+  /OpenFireServer: 
+    put:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Methods available in openfire server, to create user, establish connection, create chat rooms, join to chatrooms and other functionalities.
+      # This is array of GET operation parameters:
+      parameters:
+        # An example parameter that is in query and is required
+        -
+          name: Establish Connection
+          in: query
+          description: Establishies connection to Openfire Server
+          required: true
+          type: string
+          format: string
           
+        -
+          name: Create User
+          in: query
+          description: Creates user in Openfire Server
+          required: true
+          type: string
+          format: string
+          
+        -  
+          name: Create Chat
+          in: query
+          description: Creates chat in Openfire Server
+          required: true
+          type: string
+          format: string
+          
+        -  
+          name: Join to chatroom
+          in: query
+          description: Joins to a chat room existed in Openfire Server
+          required: true
+          type: string
+          format: string
+       
+      responses:
+        # Response code
+        200:
+          description: a dataset containing the service required by mobile user
+          # A schema describing your response object.
+          # Use JSON Schema format
+        400:
+          description: No available data
+        401:
+          description: Invalid data
+  

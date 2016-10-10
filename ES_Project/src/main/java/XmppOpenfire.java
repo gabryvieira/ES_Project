@@ -6,10 +6,7 @@ import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jivesoftware.smackx.filetransfer.FileTransferListener;
-import org.jivesoftware.smackx.filetransfer.FileTransferManager;
-import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
-import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
+import org.jivesoftware.smackx.filetransfer.*;
 import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -45,6 +42,7 @@ public class XmppOpenfire {
     private MultiUserChatManager manager;
     public static MessageListener messageListener;
 
+    private FileTransferManager filemanager;
 
     public static Scanner sc = new Scanner(System.in);
     private String body;
@@ -148,8 +146,8 @@ public class XmppOpenfire {
         do {
             System.out.print("--> ");
             body = sc.nextLine();
-            if(body.equals("@files"))
-                TransferFile(connection);
+            //if(body.equals("@files"))
+            //    TransferFile(connection, chatToJoin);
             message.setBody(body);
             message.setType(Message.Type.groupchat);
             message.setTo(chatToJoin);
@@ -181,21 +179,8 @@ public class XmppOpenfire {
         }while(!(message.equals("@back")));*/
     }
 
-    public void TransferFile(AbstractXMPPConnection connection){
-        final FileTransferManager manager = new FileTransferManager(connection); //Use your xmpp connection
-        manager.addFileTransferListener(new FileTransferListener() {
-            public void fileTransferRequest(FileTransferRequest request) {
-                IncomingFileTransfer transfer = request.accept();
-                try {
-                    InputStream input = transfer.recieveFile();
-                    //This will be a binary stream and you can process it. Create image and display it inline in your chat app.
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                } catch (SmackException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public void TransferFile(AbstractXMPPConnection connection, String chatToJoin){
+        OutgoingFileTransfer transfer = filemanager.createOutgoingFileTransfer(chatToJoin+"@conference.admin");
     }
     public String getLoginUsername(){
         return loginUsername;
