@@ -3,6 +3,8 @@
  */
 
 import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.chat.Chat;
+import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -41,6 +43,7 @@ public class XmppOpenfire {
 
     private MultiUserChatManager manager;
     public static MessageListener messageListener;
+    public ChatMessageListener chatMessage;
 
     private FileTransferManager filemanager;
 
@@ -136,11 +139,10 @@ public class XmppOpenfire {
         // room information
         RoomInfo info = manager.getRoomInfo(chatToJoin+"@conference.admin");
         System.out.println("Number of occupants: " + info.getOccupantsCount());
-        //System.out.println("Room Subject: " + info.getSubject());
         System.out.println("Room Name: "+info.getName());
 
 
-        Message message = new Message(chatToJoin + "@conference.admin", Message.Type.groupchat);
+        /*Message message = new Message(chatToJoin + "@conference.admin", Message.Type.groupchat);
         String body;
 
         do {
@@ -159,7 +161,7 @@ public class XmppOpenfire {
                             + (message != null ? message.getBody() : "NULL") + "  , Message sender :" + message.getFrom());
                 }
             });
-        }while(!body.equals("@exit"));
+        }while(!body.equals("@exit"));*/
 
 
 
@@ -177,6 +179,47 @@ public class XmppOpenfire {
             message = sc.nextLine();
             chat.sendMessage(message);
         }while(!(message.equals("@back")));*/
+    }
+
+        // send a public message to chatroom
+    public void sendPublicMessage(AbstractXMPPConnection connection, String chatName) throws Exception{
+        manager = getInstanceForConnection(connection);
+        MultiUserChat muc2 = manager.getMultiUserChat(chatName+"@conference.admin");
+        Message message = new Message(chatName + "@conference.admin", Message.Type.groupchat);
+        String body;
+
+        do {
+            System.out.print("--> ");
+            body = sc.nextLine();
+            //if(body.equals("@files"))
+            //    TransferFile(connection, chatToJoin);
+            message.setBody(body);
+            message.setType(Message.Type.groupchat);
+            message.setTo(chatName);
+            muc2.sendMessage(message);
+            muc2.addMessageListener(new MessageListener() {
+                @Override
+                public void processMessage(Message message) {
+                    System.out.println("Received message: "
+                            + (message != null ? message.getBody() : "NULL") + "  , Message sender :" + message.getFrom());
+                }
+            });
+        }while(!body.equals("@exit"));
+    }
+
+    // send private message to one user inside of the same room
+    public void sendPrivateMessage(AbstractXMPPConnection connection, String userName, String chatName) throws Exception{
+        manager = getInstanceForConnection(connection);
+        MultiUserChat muser = manager.getMultiUserChat(chatName+"@conference.admin");
+        Chat chat = muser.createPrivateChat(chatName+"@conference.admin/"+userName+"@admin/Smack", chatMessage);
+        System.out.println("Send a message: (input @back to turn back to menu)");
+        String message;
+
+        do {
+            System.out.print("--> ");
+            message = sc.nextLine();
+            chat.sendMessage(message);
+        }while(!(message.equals("@back")));
     }
 
     public void TransferFile(AbstractXMPPConnection connection, String chatToJoin){

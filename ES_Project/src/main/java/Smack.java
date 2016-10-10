@@ -74,6 +74,15 @@ public class Smack {
                     System.out.println("Input the name of the chat to join: ");
                     String chatNameToJoin = sc.next();
                     xmppOp.joinToChatRoom(connection, chatNameToJoin);
+
+                    // create private chat and send a private message
+                    System.out.print("Input the name of the user that you want to talk: ");
+                    usernameLogin = sc.next();
+                    xmppOp.sendPrivateMessage(connection, usernameLogin, chatNameToJoin);
+
+                    // send public message to room
+                    //xmppOp.sendPublicMessage(connection, chatNameToJoin);
+
                     break;
 
                 case 0:
