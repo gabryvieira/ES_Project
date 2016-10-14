@@ -15,12 +15,10 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.xdata.Form;
-import org.jivesoftware.smackx.xdata.packet.DataForm;
+import sun.awt.X11.XErrorHandler;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 
@@ -56,8 +54,6 @@ public class XmppOpenfire {
         chatOp = 0;
         newUsername = "";
         newUserPass = "";
-
-
     }
 
 
@@ -133,8 +129,11 @@ public class XmppOpenfire {
         // the amount of history to receive. In this example we are requesting the last 10 messages.
         DiscussionHistory history = new DiscussionHistory();
         history.setMaxStanzas(10); // request the last 10 messages
+
         muc2.join(connection.getUser(), "password", history, connection.getPacketReplyTimeout());
         System.out.println("Joined to chat :)");
+        //System.out.println(history);
+
 
         // room information
         RoomInfo info = manager.getRoomInfo(chatToJoin+"@conference.admin");
@@ -222,8 +221,12 @@ public class XmppOpenfire {
         }while(!(message.equals("@back")));
     }
 
-    public void TransferFile(AbstractXMPPConnection connection, String chatToJoin){
-        OutgoingFileTransfer transfer = filemanager.createOutgoingFileTransfer(chatToJoin+"@conference.admin");
+    public List<String> getJoinedRooms(AbstractXMPPConnection connection, String loginUsername) throws Exception{
+        // Get the MultiUserChatManager
+        manager = getInstanceForConnection(connection);
+        // Get the rooms where user3@host.org has joined
+        List<String> joinedRooms = manager.getJoinedRooms(loginUsername+"@admin/Smack");
+        return joinedRooms;
     }
     public String getLoginUsername(){
         return loginUsername;
@@ -243,4 +246,6 @@ public class XmppOpenfire {
         manager = MultiUserChatManager.getInstanceFor(connection);
         return manager;
     }
+
+
 }

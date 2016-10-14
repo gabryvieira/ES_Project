@@ -19,6 +19,8 @@ public class Smack {
 
     static String newUserPass;
 
+    static List<String> chatsJoined = new ArrayList<String>();
+
     static MultiUserChatManager manager;
 
     public static MessageListener messageListener;
@@ -40,6 +42,7 @@ public class Smack {
             System.out.println("1 - Create a new user");
             System.out.println("2 - Create a Group Chat");
             System.out.println("3 - Join a room");
+            System.out.println("4 - List chats joined");
             System.out.println("0 - Exit");
             System.out.print("Option --> ");
             op = sc.nextInt();
@@ -76,13 +79,18 @@ public class Smack {
                     xmppOp.joinToChatRoom(connection, chatNameToJoin);
 
                     // create private chat and send a private message
-                    System.out.print("Input the name of the user that you want to talk: ");
-                    usernameLogin = sc.next();
-                    xmppOp.sendPrivateMessage(connection, usernameLogin, chatNameToJoin);
+                    //System.out.print("Input the name of the user that you want to talk: ");
+                    //usernameLogin = sc.next();
+                    //xmppOp.sendPrivateMessage(connection, usernameLogin, chatNameToJoin);
 
                     // send public message to room
-                    //xmppOp.sendPublicMessage(connection, chatNameToJoin);
+                    xmppOp.sendPublicMessage(connection, chatNameToJoin);
 
+                    break;
+
+                case 4:
+                    chatsJoined = xmppOp.getJoinedRooms(connection, usernameLogin);
+                    System.out.println(chatsJoined.toString());
                     break;
 
                 case 0:
